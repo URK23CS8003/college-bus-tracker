@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: bus-tracker-service
+  namespace: bus-tracker
+  labels:
+    app: bus-tracker
+spec:
+  selector:
+    app: bus-tracker
+  type: NodePort
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 5000
+      nodePort: 30080
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: bus-tracker-hpa
+  namespace: bus-tracker
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: bus-tracker
+  minReplicas: 2
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
